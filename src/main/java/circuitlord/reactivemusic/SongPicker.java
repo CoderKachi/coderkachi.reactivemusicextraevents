@@ -1,6 +1,5 @@
 package circuitlord.reactivemusic;
 
-
 import circuitlord.reactivemusic.config.ModConfig;
 import circuitlord.reactivemusic.entries.RMRuntimeEntry;
 import circuitlord.reactivemusic.mixin.BossBarHudAccessor;
@@ -225,11 +224,7 @@ public final class SongPicker
                     player.getX() + radiusXZ, player.getY() + radiusY, player.getZ() + radiusXZ);
 
             List<VillagerEntity> nearbyVillagerCheck = world.getEntitiesByClass(VillagerEntity.class, box, entity -> entity != null);
-
-            for (VillagerEntity villagerEntity : nearbyVillagerCheck) 
-            {
-                villagerCount++;
-            }
+            villagerCount = nearbyVillagerCheck.size();
 
             songpackEventMap.put(SongpackEventType.VILLAGE, villagerCount > 0);
         }
@@ -263,9 +258,6 @@ public final class SongPicker
 
     public static void tickBlockCounterMap()
     {
-        long startTime = System.currentTimeMillis();
-        long startNano = System.nanoTime();
-
         int RADIUS = 25;
 
         MinecraftClient mc = MinecraftClient.getInstance();
@@ -351,8 +343,6 @@ public final class SongPicker
             songpackEventMap.put(eventType, false);
         }
     }
-
-    private static final List<SongpackEntry> reusableValidEntries = new ArrayList<>();
 
     static boolean hasSongNotPlayedRecently(List<String> songs)
     {
@@ -465,7 +455,11 @@ public final class SongPicker
             boolean extrasValid = false;
             for (RMExtrasCondition extra : condition.extras)
             {
-                extrasValid = true; // Just set everything to true for now
+                if (extra.evaluate())
+                {
+                    extrasValid = true;
+                    break;
+                }
             }
 
             if (!songpackEventsValid && !biomeTypesValid && !biomeTagsValid && !dimsValid && !blocksValid && !extrasValid)

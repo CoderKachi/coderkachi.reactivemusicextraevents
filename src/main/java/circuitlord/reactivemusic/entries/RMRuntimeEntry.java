@@ -182,11 +182,10 @@ public class RMRuntimeEntry
                     {
                         condition.extras.add(new RMExtrasCondition(key, value, validator));
                         eventHasData = true;
-                        System.out.println("[Reactive Music: Extra Events] Found: " + key);
                     }
                     else
                     {
-                        Entry.errorString += "[Reactive Music: Extra Events] No validator registered for " + key + "!\n";
+                        System.out.println("[Reactive Music: Extra Events] No validator registered for " + key);
                     }
                 }
 

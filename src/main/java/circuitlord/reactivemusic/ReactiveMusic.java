@@ -11,7 +11,7 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
+//import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
 import net.minecraft.client.MinecraftClient;
@@ -19,7 +19,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.option.GameOptions;
 import net.minecraft.client.sound.SoundInstance;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
+//import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
@@ -31,13 +31,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class ReactiveMusic implements ModInitializer {
-
+public class ReactiveMusic implements ModInitializer
+{
 	public static final String MOD_ID = "reactive_music";
-
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-	private static final int WAIT_FOR_SWITCH_DURATION = 100;
+	//private static final int WAIT_FOR_SWITCH_DURATION = 100;
 	public static final int FADE_DURATION = 150;
 	public static final int SILENCE_DURATION = 100;
 
@@ -107,37 +106,31 @@ public class ReactiveMusic implements ModInitializer {
 
 		/// REACTIVE MUSIC: EXTRA EVENTS
         /// Load all extras BEFORE ReactiveMusic setups SongPicker, etc
-		LOGGER.info("Setting up Reactive Music: Extra Events...");
-		System.out.println("[Reactive Music: Extra Events] Hello World!");
 		for (EntrypointContainer<RMExtrasEntryPoint> container : FabricLoader.getInstance().getEntrypointContainers("rmextras", RMExtrasEntryPoint.class))
 		{
             // Track name of mod that provided current entrypoint for debugging
             String entrypointProvider = container.getProvider().getMetadata().getName();
 
             container.getEntrypoint().registerExtras();
-			LOGGER.info("[Reactive Music: Extra Events] Registering extras from:" + entrypointProvider);
+			System.out.println("[Reactive Music: Extra Events] Registering extras from: [" + entrypointProvider + "]");
         }
 
 		ModConfig.GSON.load();
 		config = ModConfig.getConfig();
 
-        if (FabricLoader.getInstance().getEnvironmentType().equals(EnvType.SERVER)) {
-
-
+        if (FabricLoader.getInstance().getEnvironmentType().equals(EnvType.SERVER))
+		{
             ServerLifecycleEvents.SERVER_STARTED.register(newServer -> {
 
                 server = newServer;
-
-                for (ServerPlayerEntity player : PlayerLookup.all(server)) {
+				
+				/*
+                for (ServerPlayerEntity player : PlayerLookup.all(server))
+				{
 
                 }
+				*/
             });
-
-/*
-            for (ServerPlayerEntity player : PlayerLookup.world((ServerWorld) world)) {
-                ServerPlayNetworking.send(player, payload);
-            }
-*/
 
             return;
         }
@@ -167,10 +160,11 @@ public class ReactiveMusic implements ModInitializer {
 		}
 
 		// load the default one
-		if (!loadedUserSongpack) {
-
+		if (!loadedUserSongpack)
+		{
 			// for the cases where something is broken in the base songpack
-			if (!RMSongpackLoader.availableSongpacks.get(0).blockLoading) {
+			if (!RMSongpackLoader.availableSongpacks.get(0).blockLoading)
+			{
 				// first is the default songpack
 				setActiveSongpack(RMSongpackLoader.availableSongpacks.get(0));
 			}
@@ -600,19 +594,22 @@ public class ReactiveMusic implements ModInitializer {
 
 	}
 
-	public static int getMusicStopSpeed(SongpackZip songpack) {
-
+	public static int getMusicStopSpeed(SongpackZip songpack)
+	{
 		MusicSwitchSpeed speed = config.musicSwitchSpeed2;
 
-		if (config.musicSwitchSpeed2 == MusicSwitchSpeed.SONGPACK_DEFAULT) {
+		if (config.musicSwitchSpeed2 == MusicSwitchSpeed.SONGPACK_DEFAULT)
+		{
 			speed = songpack.config.musicSwitchSpeed;
 		}
 
-		if (config.debugModeEnabled) {
+		if (config.debugModeEnabled)
+		{
 			speed = MusicSwitchSpeed.INSTANT;
 		}
 
-		switch (speed) {
+		switch (speed)
+		{
 			case INSTANT:
 				return 100;
 			case SHORT:
@@ -621,25 +618,27 @@ public class ReactiveMusic implements ModInitializer {
 				return 900;
 			case LONG:
 				return 2400;
+			default:
+				return 100;
 		}
-
-		return 100;
-
 	}
 
-	public static int getMusicDelay(SongpackZip songpack) {
-
+	public static int getMusicDelay(SongpackZip songpack)
+	{
 		MusicDelayLength delay = config.musicDelayLength2;
 
-		if (config.musicDelayLength2 == MusicDelayLength.SONGPACK_DEFAULT) {
+		if (config.musicDelayLength2 == MusicDelayLength.SONGPACK_DEFAULT)
+		{
 			delay = songpack.config.musicDelayLength;
 		}
 
-		if (config.debugModeEnabled) {
+		if (config.debugModeEnabled) 
+		{
 			delay = MusicDelayLength.NONE;
 		}
 
-		switch (delay) {
+		switch (delay) 
+		{
 			case NONE:
 				return 0;
 			case SHORT:
@@ -648,17 +647,16 @@ public class ReactiveMusic implements ModInitializer {
 				return 900;
 			case LONG:
 				return 2400;
+			default:
+				return 100;
 		}
-
-		return 100;
-
 	}
 
-	static void resetPlayer() {
-
-
+	static void resetPlayer()
+	{
 		// if queued or playing
-		if (!thread.notQueuedOrPlaying()) {
+		if (!thread.notQueuedOrPlaying())
+		{
 			thread.resetPlayer();
 		}
 

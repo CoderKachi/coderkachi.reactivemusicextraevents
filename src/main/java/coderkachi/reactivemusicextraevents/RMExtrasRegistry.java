@@ -8,6 +8,7 @@ public class RMExtrasRegistry
 
     public static void register(String key, RMExtrasValidator validator)
     {
+        System.out.println("[Reactive Music: Extra Events] Registered extra event: " + key);
         registry.put(key.toLowerCase(), validator);
     }
 

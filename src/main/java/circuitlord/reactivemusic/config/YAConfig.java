@@ -1,10 +1,10 @@
 package circuitlord.reactivemusic.config;
 
-import com.google.gson.GsonBuilder;
+//import com.google.gson.GsonBuilder;
 import dev.isxander.yacl3.api.*;
 import dev.isxander.yacl3.api.controller.TickBoxControllerBuilder;
-import dev.isxander.yacl3.config.GsonConfigInstance;
-import net.fabricmc.loader.api.FabricLoader;
+//import dev.isxander.yacl3.config.GsonConfigInstance;
+//import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
 

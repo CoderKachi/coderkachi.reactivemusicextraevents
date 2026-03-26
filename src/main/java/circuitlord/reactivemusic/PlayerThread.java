@@ -9,11 +9,8 @@ import rm_javazoom.jl.player.JavaSoundAudioDevice;
 import rm_javazoom.jl.player.advanced.AdvancedPlayer;
 import net.minecraft.text.TranslatableTextContent;
 
-import java.io.IOException;
-import java.io.InputStream;
-
-public class PlayerThread extends Thread {
-
+public class PlayerThread extends Thread 
+{
 	public static final float MIN_POSSIBLE_GAIN = -80F;
 	public static final float MIN_GAIN = -50F;
 	public static final float MAX_GAIN = 0F;
@@ -240,7 +237,6 @@ public class PlayerThread extends Thread {
 		try {
 			resetPlayer();
 			interrupt();
-
 			finalize();
 			kill = true;
 		} catch(Throwable e) {

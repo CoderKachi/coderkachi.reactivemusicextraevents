@@ -5,13 +5,15 @@
 	"name": "Reactive Music: Extra Events",
 	"description": "An extension of CircuitLord's Reactive Music which adds more events.",
 	"authors": ["CoderKachi", "CircuitLord"],
-	"contact": {"sources": "https://github.com/CircuitLord/ReactiveMusic"},
+	"contact": {},
 	"license": "GPLv3",
 	"icon": "assets/reactivemusic/icon.png",
 	"environment": "client",
 	"entrypoints": 
 	{
-		"rmextras": ["coderkachi.reactivemusicextraevents.ReactiveMusicExtraEvents"]
+		"rmextras": ["coderkachi.reactivemusicextraevents.ReactiveMusicExtraEvents"],
+		"main": ["circuitlord.reactivemusic.ReactiveMusic"],
+		"modmenu": ["circuitlord.reactivemusic.compat.modmenu.ModMenuIntegration"]
 	},
 	"mixins": ["reactivemusicextraevents.mixins.json"],
 	"depends": 
