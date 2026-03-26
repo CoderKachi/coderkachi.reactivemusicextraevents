@@ -4,6 +4,7 @@ import circuitlord.reactivemusic.config.ModConfig;
 import circuitlord.reactivemusic.config.MusicDelayLength;
 import circuitlord.reactivemusic.config.MusicSwitchSpeed;
 import circuitlord.reactivemusic.entries.RMRuntimeEntry;
+import coderkachi.reactivemusicextraevents.RMExtrasEntryPoint;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
 
@@ -12,6 +13,7 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.option.GameOptions;
@@ -99,14 +101,25 @@ public class ReactiveMusic implements ModInitializer {
 
 
 	@Override
-	public void onInitialize() {
-
+	public void onInitialize()
+	{
 		LOGGER.info("Initializing Reactive Music...");
+
+		/// REACTIVE MUSIC: EXTRA EVENTS
+        /// Load all extras BEFORE ReactiveMusic setups SongPicker, etc
+		LOGGER.info("Setting up Reactive Music: Extra Events...");
+		System.out.println("[Reactive Music: Extra Events] Hello World!");
+		for (EntrypointContainer<RMExtrasEntryPoint> container : FabricLoader.getInstance().getEntrypointContainers("rmextras", RMExtrasEntryPoint.class))
+		{
+            // Track name of mod that provided current entrypoint for debugging
+            String entrypointProvider = container.getProvider().getMetadata().getName();
+
+            container.getEntrypoint().registerExtras();
+			LOGGER.info("[Reactive Music: Extra Events] Registering extras from:" + entrypointProvider);
+        }
 
 		ModConfig.GSON.load();
 		config = ModConfig.getConfig();
-
-
 
         if (FabricLoader.getInstance().getEnvironmentType().equals(EnvType.SERVER)) {
 
@@ -115,14 +128,10 @@ public class ReactiveMusic implements ModInitializer {
 
                 server = newServer;
 
-
-
                 for (ServerPlayerEntity player : PlayerLookup.all(server)) {
 
                 }
             });
-
-
 
 /*
             for (ServerPlayerEntity player : PlayerLookup.world((ServerWorld) world)) {
@@ -131,17 +140,11 @@ public class ReactiveMusic implements ModInitializer {
 */
 
             return;
-
         }
-
-
-
 
 		SongPicker.initialize();
 
-
 		thread = new PlayerThread();
-
 		RMSongpackLoader.fetchAvailableSongpacks();
 
 		boolean loadedUserSongpack = false;
@@ -172,9 +175,6 @@ public class ReactiveMusic implements ModInitializer {
 				setActiveSongpack(RMSongpackLoader.availableSongpacks.get(0));
 			}
 		}
-
-
-
 
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> dispatcher.register(ClientCommandManager.literal("reactivemusic")
 				.executes(context -> {
@@ -368,10 +368,7 @@ public class ReactiveMusic implements ModInitializer {
 				thread.setGainPercentage(1f - (fadeOutTicks / (float)FADE_DURATION));
 			}
 
-
-
 			// ---- FADE OUT ----
-
 			if (wantsToSwitch && thread.isPlaying()) {
 
 				waitForStopTicks++;
@@ -438,13 +435,9 @@ public class ReactiveMusic implements ModInitializer {
 
 		}
 
-
-
 		thread.processRealGain();
 
-
 		previousValidEntries = validEntries;
-
 	}
 
 	private static @NotNull List<String> getSelectedSongs(RMRuntimeEntry newEntry, List<RMRuntimeEntry> validEntries) {
@@ -467,20 +460,20 @@ public class ReactiveMusic implements ModInitializer {
 			}
 		}
 
-
 		// we've played everything recently, just give up and return this event's songs
 		return newEntry.songs;
 	}
 
-
-	public static List<RMRuntimeEntry> getValidEntries() {
+	public static List<RMRuntimeEntry> getValidEntries()
+	{
 		List<RMRuntimeEntry> validEntries = new ArrayList<>();
 
-        for (RMRuntimeEntry loadedEntry : loadedEntries) {
-
+        for (RMRuntimeEntry loadedEntry : loadedEntries)
+		{
             boolean isValid = SongPicker.isEntryValid(loadedEntry);
 
-            if (isValid) {
+            if (isValid)
+			{
                 validEntries.add(loadedEntry);
             }
         }
@@ -488,9 +481,8 @@ public class ReactiveMusic implements ModInitializer {
 		return validEntries;
 	}
 
-	private static void processValidEvents(List<RMRuntimeEntry> validEntries, List<RMRuntimeEntry> previousValidEntries) {
-
-
+	private static void processValidEvents(List<RMRuntimeEntry> validEntries, List<RMRuntimeEntry> previousValidEntries)
+	{
 		for (var entry : previousValidEntries) {
 
 			// if this event was valid before and is invalid now
@@ -534,20 +526,12 @@ public class ReactiveMusic implements ModInitializer {
 						queuedToPlayMusic = true;
 					}
 				}
-
 			}
-
-
 		}
-
-
-
-
 	}
 
-
-	public static void tickFadeOut() {
-
+	public static void tickFadeOut()
+	{
 		if (!thread.isPlaying())
 			return;
 
@@ -559,7 +543,6 @@ public class ReactiveMusic implements ModInitializer {
 			resetPlayer();
 		}
 	}
-
 
 	public static void changeCurrentSong(String song, RMRuntimeEntry newEntry) {
 
@@ -587,8 +570,6 @@ public class ReactiveMusic implements ModInitializer {
 		queuedToPlayMusic = false;
 
 	}
-
-
 
 	public static void setActiveSongpack(SongpackZip songpackZip) {
 
@@ -687,11 +668,8 @@ public class ReactiveMusic implements ModInitializer {
 		currentSong = null;
 	}
 
-
-
-
-	private static void processTrackedSoundsMuteMusic() {
-
+	private static void processTrackedSoundsMuteMusic()
+	{
 		// remove if the song is null or not playing anymore
 		trackedSoundsMuteMusic.removeIf(soundInstance -> soundInstance == null || !MinecraftClient.getInstance().getSoundManager().isPlaying(soundInstance));
 
@@ -707,7 +685,7 @@ public class ReactiveMusic implements ModInitializer {
 				Vec3d pos = new Vec3d(soundInstance.getX(), soundInstance.getY(), soundInstance.getZ());
 
 				if (MinecraftClient.getInstance().player != null) {
-					Vec3d dist = MinecraftClient.getInstance().player.getEntityPos().subtract(pos);
+					Vec3d dist = MinecraftClient.getInstance().player.getPos().subtract(pos);
 
 					if (dist.length() > 65.f) {
 						continue;
@@ -725,9 +703,6 @@ public class ReactiveMusic implements ModInitializer {
 			break;
 		}
 
-
-
-
 		// only duck for jukebox if our volume is loud enough to where it would matter
 		if (foundSoundInstance) {
 
@@ -743,14 +718,10 @@ public class ReactiveMusic implements ModInitializer {
 		}
 
 		thread.setMusicDiscDuckPercentage(1f - (musicTrackedSoundsDuckTicks / (float)FADE_DURATION));
-
-
 	}
 
-
-
-    private static void doDebugLog(String text) {
-
+    private static void doDebugLog(String text)
+	{
         var debugString = "[ReactiveMusic]: " + text;
 
         LOGGER.info(debugString);
@@ -761,10 +732,4 @@ public class ReactiveMusic implements ModInitializer {
         MinecraftClient.getInstance().player.sendMessage(Text.literal(debugString), false);
 
     }
-
-
-
-
-
-
 }

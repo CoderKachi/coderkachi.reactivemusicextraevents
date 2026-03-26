@@ -4,14 +4,16 @@ import circuitlord.reactivemusic.SongPicker;
 import circuitlord.reactivemusic.SongpackEntry;
 import circuitlord.reactivemusic.SongpackEventType;
 import circuitlord.reactivemusic.SongpackZip;
+import coderkachi.reactivemusicextraevents.RMExtrasCondition;
+import coderkachi.reactivemusicextraevents.RMExtrasRegistry;
+import coderkachi.reactivemusicextraevents.RMExtrasValidator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class RMRuntimeEntry {
-
-
+public class RMRuntimeEntry 
+{
     public List<RMEntryCondition> conditions = new ArrayList<>();
 
     public String songpack;
@@ -20,19 +22,14 @@ public class RMRuntimeEntry {
 
     public boolean forceStopMusicOnValid = false;
     public boolean forceStopMusicOnInvalid = false;
-
     public boolean forceStartMusicOnValid = false;
-
     public float forceChance = 1.0f;
 
     public List<String> songs = new ArrayList<>();
 
     public String eventString = "";
-
     public String errorString = "";
-
     public float cachedRandomChance = 1.0f;
-
 
     public static RMRuntimeEntry create(SongpackZip songpack, SongpackEntry songpackEntry) {
 
@@ -74,16 +71,16 @@ public class RMRuntimeEntry {
             boolean eventHasData = false;
 
             // Parse each event section (may only be one)
-            for (String eventSection : eventSections) {
-
-                if (eventSection.startsWith("block=")) {
-
+            for (String eventSection : eventSections)
+            {
+                if (eventSection.startsWith("block=")) 
+                {
                     String blockData = eventSection.substring(6);
                     String[] parts = blockData.split(",");
 
                     // make sure it's a number, dunno why this is the syntax for that
-                    if (parts.length >= 2 && parts[1].matches("\\d+")) {
-
+                    if (parts.length >= 2 && parts[1].matches("\\d+"))
+                    {
                         RMEntryBlockCondition blockCond = new RMEntryBlockCondition();
                         blockCond.block = parts[0];
                         blockCond.requiredCount = Integer.parseInt(parts[1]);
@@ -92,49 +89,47 @@ public class RMRuntimeEntry {
 
                         eventHasData = true;
                     }
-                    else {
+                    else
+                    {
                         Entry.errorString += "Invalid syntax: " + eventSection + "!\n\n";
                     }
                 }
 
                 // see if it's a biome event
-                else if (eventSection.startsWith("biome=")) {
-
+                else if (eventSection.startsWith("biome="))
+                {
                     String biomeName = eventSection.substring(6);
-                    if (biomeName.isEmpty())
-                        continue;
+                    if (biomeName.isEmpty()) continue;
 
                     condition.biomeTypes.add(biomeName);
                     eventHasData = true;
                 }
 
                 // Biome-tags
-                else if (eventSection.startsWith("biometag=")) {
-
+                else if (eventSection.startsWith("biometag="))
+                {
                     String rawTagString = eventSection.substring(9);
 
                     // convert to v2 biome tag
                     String biomeTagName = cleanBiomeTagString(rawTagString);
-                    if (biomeTagName.isEmpty())
-                        continue;
+                    if (biomeTagName.isEmpty()) continue;
 
                     // Loop over all the cached tags and see if we have anything matching this
-
                     boolean foundMatch = false;
 
-                    for (int k = 0; k < SongPicker.BIOME_TAG_FIELDS.length; k++) {
-
+                    for (int k = 0; k < SongPicker.BIOME_TAG_FIELDS.length; k++)
+                    {
                         // i love creating GC
                         String fieldName = SongPicker.BIOME_TAG_FIELDS[k].getName();
 
                         // convert our cached field tag to the v2 format (even with v1) since we did the same for the loaded one
                         fieldName = cleanBiomeTagString(fieldName);
 
-                        if (fieldName.equals(biomeTagName)) {
-
+                        if (fieldName.equals(biomeTagName))
+                        {
                             var biomeTag = SongPicker.getBiomeTagFromField(SongPicker.BIOME_TAG_FIELDS[k]);
-
-                            if (biomeTag != null) {
+                            if (biomeTag != null)
+                            {
                                 // We found a match, now put the biometag key into the condition so we can use it later
                                 condition.biomeTags.add(biomeTag);
                                 eventHasData = true;
@@ -146,14 +141,15 @@ public class RMRuntimeEntry {
                     }
 
                     // we didn't find a match
-                    if (!foundMatch) {
+                    if (!foundMatch)
+                    {
                         Entry.errorString += "Didn't find biometag with name: " + rawTagString + "!\n\n";
                     }
-
                 }
 
                 // dimensions
-                else if (eventSection.startsWith("dim=")) {
+                else if (eventSection.startsWith("dim="))
+                {
                     String dimName = eventSection.substring(4);
                     if (dimName.isEmpty())
                         continue;
@@ -162,9 +158,43 @@ public class RMRuntimeEntry {
                     eventHasData = true;
                 }
 
+                /// REACTIVE MUSIC: EXTRAS EVENTS
+                /// Needed to parse songpacks using the EXTRAS: tag
+                else if(eventSection.startsWith("extras:"))
+                {
+                    String extrasEventSection = eventSection.substring(7);
+                    String key;
+                    String value = null;
+
+                    if(extrasEventSection.contains("="))
+                    {
+                        String[] parts = extrasEventSection.split("=", 2);
+                        key = parts[0];
+                        value = parts[1];
+                    }
+                    else
+                    {
+                        key = extrasEventSection;
+                    }
+
+                    RMExtrasValidator validator = RMExtrasRegistry.getValidator(key);
+                    if (validator != null)
+                    {
+                        condition.extras.add(new RMExtrasCondition(key, value, validator));
+                        eventHasData = true;
+                        System.out.println("[Reactive Music: Extra Events] Found: " + key);
+                    }
+                    else
+                    {
+                        Entry.errorString += "[Reactive Music: Extra Events] No validator registered for " + key + "!\n";
+                    }
+                }
+
                 // songpack events
-                else {
-                    try {
+                else
+                {
+                    try
+                    {
                         // try to cast to SongpackEvent
                         // needs uppercase for enum names
                         SongpackEventType eventType = Enum.valueOf(SongpackEventType.class, eventSection.toUpperCase());
@@ -175,7 +205,9 @@ public class RMRuntimeEntry {
                             eventHasData = true;
                             continue;
                         }
-                    } catch (Exception e) {
+                    }
+                    catch (Exception e)
+                    {
                         Entry.errorString += "Could not find event with name " + eventSection + "!\n\n";
                         //e.printStackTrace();
                     }
@@ -183,20 +215,15 @@ public class RMRuntimeEntry {
             }
 
             // --- If we didn't find any valid conditions, skip this ---
-            if (!eventHasData) {
-                continue;
-            }
-
+            if (!eventHasData) {continue;}
             Entry.conditions.add(condition);
-
         }
 
         return Entry;
-
     }
 
-
-    public static String cleanBiomeTagString(String input) {
+    public static String cleanBiomeTagString(String input)
+    {
         input = input.toLowerCase();
 
         // handle cases where the start of the tag changed
@@ -205,16 +232,7 @@ public class RMRuntimeEntry {
         input = input.replace("climate_", "");
 
         // converting to 1.21 format with biometag v2
-
-
         input = input.replace("tree_coniferous", "coniferous_tree");
-
         return input;
-
     }
-
-
 }
-
-
-

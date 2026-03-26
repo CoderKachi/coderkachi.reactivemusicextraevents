@@ -4,7 +4,8 @@ package circuitlord.reactivemusic;
 import circuitlord.reactivemusic.config.ModConfig;
 import circuitlord.reactivemusic.entries.RMRuntimeEntry;
 import circuitlord.reactivemusic.mixin.BossBarHudAccessor;
-import net.fabricmc.fabric.api.tag.convention.v2.ConventionalBiomeTags;
+import coderkachi.reactivemusicextraevents.RMExtrasCondition;
+import net.fabricmc.fabric.api.tag.convention.v1.ConventionalBiomeTags;
 import net.minecraft.block.Block;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.CreditsScreen;
@@ -32,16 +33,11 @@ import net.minecraft.world.biome.Biome;
 import java.lang.reflect.Field;
 import java.util.*;
 
-public final class SongPicker {
-
-
-
+public final class SongPicker
+{
     public static Map<SongpackEventType, Boolean> songpackEventMap = new EnumMap<>(SongpackEventType.class);
-
     public static Map<TagKey<Biome>, Boolean> biomeTagEventMap = new HashMap<>();
-
     public static Map<Entity, Long> recentEntityDamageSources = new HashMap<>();
-
 
     private static final Set<String> BLOCK_COUNTER_BLACKLIST = Set.of(); // = Set.of("ore", "debris");
 
@@ -68,9 +64,10 @@ public final class SongPicker {
 
     public static boolean wasSleeping = false;
 
-    static {
-
-        for (Field field : BIOME_TAG_FIELDS) {
+    static
+    {
+        for (Field field : BIOME_TAG_FIELDS)
+        {
             TagKey<Biome> biomeTag = getBiomeTagFromField(field);
 
             BIOME_TAGS.add(biomeTag);
@@ -78,24 +75,26 @@ public final class SongPicker {
         }
     }
 
-    public static TagKey<Biome> getBiomeTagFromField(Field field) {
-        if (field.getType() == TagKey.class) {
-            try {
+    public static TagKey<Biome> getBiomeTagFromField(Field field)
+    {
+        if (field.getType() == TagKey.class)
+        {
+            try 
+            {
                 @SuppressWarnings("unchecked")
                 TagKey<Biome> tag = (TagKey<Biome>) field.get(null);
                 return tag;
-            } catch (IllegalAccessException e) {
+            } 
+            catch (IllegalAccessException e) 
+            {
                 e.printStackTrace();
             }
         }
         return null;
     }
 
-
-
-
-    public static void tickEventMap() {
-
+    public static void tickEventMap() 
+    {
         currentBiomeName = "";
         currentDimName = "";
 
@@ -134,30 +133,26 @@ public final class SongPicker {
         boolean sunset = time >= 12000 && time < 13000;
         boolean sunrise = time >= 23000;
 
-
         // TODO: someone help me I have no idea how to get the name of the world/server but if you know how then put it instead of "saved"
-        if (!wasSleeping && player.isSleeping()) {
-            ReactiveMusic.config.savedHomePositions.put("saved", player.getEntityPos());
+        if (!wasSleeping && player.isSleeping())
+        {
+            ReactiveMusic.config.savedHomePositions.put("saved", player.getPos());
 
             ModConfig.saveConfig();
         }
 
         wasSleeping = player.isSleeping();
 
-
         // special
-
-        if (ReactiveMusic.config.savedHomePositions.containsKey("saved")) {
-
-            Vec3d dist = player.getEntityPos().subtract(ReactiveMusic.config.savedHomePositions.get("saved"));
-
+        if (ReactiveMusic.config.savedHomePositions.containsKey("saved"))
+        {
+            Vec3d dist = player.getPos().subtract(ReactiveMusic.config.savedHomePositions.get("saved"));
             songpackEventMap.put(SongpackEventType.HOME, dist.length() < 45.0f);
         }
-        else {
+        else 
+        {
             songpackEventMap.put(SongpackEventType.HOME, false);
         }
-
-
 
         // Time
         songpackEventMap.put(SongpackEventType.DAY, !night);
@@ -165,9 +160,7 @@ public final class SongPicker {
         songpackEventMap.put(SongpackEventType.SUNSET, sunset);
         songpackEventMap.put(SongpackEventType.SUNRISE, sunrise);
 
-
         // Actions
-
         songpackEventMap.put(SongpackEventType.DYING, player.getHealth() / player.getMaxHealth() < 0.35);
         songpackEventMap.put(SongpackEventType.FISHING, player.fishHook != null);
 
@@ -176,34 +169,32 @@ public final class SongPicker {
         songpackEventMap.put(SongpackEventType.HORSE, riding instanceof HorseEntity);
         songpackEventMap.put(SongpackEventType.PIG, riding instanceof PigEntity);
 
-
         songpackEventMap.put(SongpackEventType.OVERWORLD, indimension == World.OVERWORLD);
         songpackEventMap.put(SongpackEventType.NETHER, indimension == World.NETHER);
         songpackEventMap.put(SongpackEventType.END, indimension == World.END);
 
-
         songpackEventMap.put(SongpackEventType.UNDERGROUND, indimension == World.OVERWORLD && underground && playerPos.getY() < 55);
         songpackEventMap.put(SongpackEventType.DEEP_UNDERGROUND, indimension == World.OVERWORLD && underground && playerPos.getY() < 15);
         songpackEventMap.put(SongpackEventType.HIGH_UP, indimension == World.OVERWORLD && !underground && playerPos.getY() > 128);
-
         songpackEventMap.put(SongpackEventType.UNDERWATER, player.isSubmergedInWater());
 
         // Weather
-        songpackEventMap.put(SongpackEventType.RAIN, world.isRaining() && biome.value().getPrecipitation(playerPos, world.getSeaLevel()) == Biome.Precipitation.RAIN);
-        songpackEventMap.put(SongpackEventType.SNOW, world.isRaining() && biome.value().getPrecipitation(playerPos, world.getSeaLevel()) == Biome.Precipitation.SNOW);
-
+        songpackEventMap.put(SongpackEventType.RAIN, world.isRaining() && biome.value().getPrecipitation(playerPos) == Biome.Precipitation.RAIN);
+        songpackEventMap.put(SongpackEventType.SNOW, world.isRaining() && biome.value().getPrecipitation(playerPos) == Biome.Precipitation.SNOW);
         songpackEventMap.put(SongpackEventType.STORM, world.isThundering());
-
 
         var currentTags = biome.streamTags().toList();
 
         // Update all ConventionalBiomeTags
-        for (TagKey<Biome> tag : BIOME_TAGS) {
+        for (TagKey<Biome> tag : BIOME_TAGS)
+        {
             boolean found = false;
 
             // search by ID instead of comparing tagkey, doesn't work on non-fabric
-            for (TagKey<Biome> curTag : currentTags) {
-                if (curTag.id() == tag.id()) {
+            for (TagKey<Biome> curTag : currentTags) 
+            {
+                if (curTag.id() == tag.id()) 
+                {
                     found = true;
                     break;
                 }
@@ -212,9 +203,7 @@ public final class SongPicker {
             biomeTagEventMap.put(tag, found);
         }
 
-
         // process recent damage sources
-
         // remove past sources
         recentEntityDamageSources.entrySet().removeIf(entry -> entry.getKey() == null || !entry.getKey().isAlive() || world.getTime() - entry.getValue() > TIME_FOR_FORGET_DAMAGE_SOURCE);
 
@@ -225,11 +214,7 @@ public final class SongPicker {
             recentEntityDamageSources.put(recentDamage.getSource(), world.getTime());
         }
 
-
-
-
         // Search for nearby entities that could be relevant to music
-
         {
             int villagerCount = 0;
 
@@ -241,12 +226,12 @@ public final class SongPicker {
 
             List<VillagerEntity> nearbyVillagerCheck = world.getEntitiesByClass(VillagerEntity.class, box, entity -> entity != null);
 
-            for (VillagerEntity villagerEntity : nearbyVillagerCheck) {
+            for (VillagerEntity villagerEntity : nearbyVillagerCheck) 
+            {
                 villagerCount++;
             }
 
             songpackEventMap.put(SongpackEventType.VILLAGE, villagerCount > 0);
-
         }
 
         {
@@ -255,14 +240,7 @@ public final class SongPicker {
                     entity -> entity != null);
 
             songpackEventMap.put(SongpackEventType.NEARBY_MOBS, nearbyHostile.size() >= 1);
-
         }
-
-
-        //songpackEventMap.put(SongpackEventType.HOSTILE_MOBS, aggroMobsCount >= 4);
-
-        //System.out.println("Villager count: " + villagerCount + ", Aggro mobs count: " + aggroMobsCount);
-
 
         // try to get boss bars
         boolean bossBarActive = false;
@@ -279,17 +257,12 @@ public final class SongPicker {
             }
         }
 
-
         songpackEventMap.put(SongpackEventType.BOSS, bossBarActive);
-
-
         songpackEventMap.put(SongpackEventType.GENERIC, true);
     }
 
-
-
-    public static void tickBlockCounterMap() {
-
+    public static void tickBlockCounterMap()
+    {
         long startTime = System.currentTimeMillis();
         long startNano = System.nanoTime();
 
@@ -298,25 +271,7 @@ public final class SongPicker {
         MinecraftClient mc = MinecraftClient.getInstance();
         ClientPlayerEntity player = mc.player;
         World world = mc.world;
-        if (player == null || world == null)
-            return;
-
-
-
-        // Advance y, then x
-/*        currentBlockCounterY++;
-        if (currentBlockCounterY > RADIUS) {
-            currentBlockCounterY = -RADIUS;
-
-            currentBlockCounterX++;
-
-            ReactiveMusic.LOGGER.info("blockchecker X:" + currentBlockCounterX);
-            if (currentBlockCounterX > RADIUS) {
-                currentBlockCounterX = -RADIUS;
-
-               // ReactiveMusic.LOGGER.info("blockchecker X:" + currentBlockCounterX);
-            }
-        }*/
+        if (player == null || world == null) return;
 
         // just X
         currentBlockCounterX++;
@@ -325,11 +280,10 @@ public final class SongPicker {
         }
 
         // finished iterating, reset
-        if (currentBlockCounterX == -RADIUS/* && currentBlockCounterY == -RADIUS*/) {
-            // ReactiveMusic.LOGGER.info("Finished checking for blocks, resetting! Total: " + blockCounterMap.size());
-
-            if (queuedToPrintBlockCounter) {
-
+        if (currentBlockCounterX == -RADIUS) 
+        {
+            if (queuedToPrintBlockCounter)
+            {
                 player.sendMessage(Text.of("[ReactiveMusic]: Logging Block Counter map! Radius: " + RADIUS), false);
 
                 blockCounterMap.entrySet().stream()
@@ -337,7 +291,6 @@ public final class SongPicker {
                         .forEach(entry -> player.sendMessage(Text.of(entry.getKey() + ": " + entry.getValue()), false));
 
                 queuedToPrintBlockCounter = false;
-
             }
 
             // copy
@@ -380,90 +333,29 @@ public final class SongPicker {
 
             }
         }
-
-
-
-        //ReactiveMusic.LOGGER.info("tickBlockCounterMap() took " + (System.currentTimeMillis() - startTime) + "ms");
-
-        long endNano = System.nanoTime();
-        long elapsedNano = endNano - startNano;
-        double elapsedMs = elapsedNano / 1_000_000.0;
-
-        //ReactiveMusic.LOGGER.info("tickBlockCounterMap() took (" + elapsedMs + "ms)");
-
-
-
-
     }
 
-
-
-    private static Box GetBoxAroundPlayer(ClientPlayerEntity player, float radiusXZ, float radiusY) {
-
+    private static Box GetBoxAroundPlayer(ClientPlayerEntity player, float radiusXZ, float radiusY)
+    {
         return new Box(player.getX() - radiusXZ, player.getY() - radiusY, player.getZ() - radiusXZ,
                 player.getX() + radiusXZ, player.getY() + radiusY, player.getZ() + radiusXZ);
 
     }
 
-
-    public static void initialize() {
-
+    public static void initialize()
+    {
         songpackEventMap.clear();
 
-        for (SongpackEventType eventType : SongpackEventType.values()) {
+        for (SongpackEventType eventType : SongpackEventType.values()) 
+        {
             songpackEventMap.put(eventType, false);
         }
     }
 
-
-
-
     private static final List<SongpackEntry> reusableValidEntries = new ArrayList<>();
 
-
-/*    public static List<SongpackEntry> getAllValidEntries() {
-
-        reusableValidEntries.clear();
-
-        for (int i = 0; i < SongLoader.activeSongpack.entries.length; i++) {
-
-            SongpackEntry entry = SongLoader.activeSongpack.entries[i];
-            if (entry == null) continue;
-
-            boolean eventsMet = true;
-
-            for (SongpackEventType songpackEvent : entry.songpackEvents) {
-
-                if (!songpackEventMap.containsKey(songpackEvent))
-                    continue;
-
-                if (!songpackEventMap.get(songpackEvent)) {
-                    eventsMet = false;
-                    break;
-                }
-            }
-
-            for (TagKey<Biome> biomeTagEvent : entry.biomeTagEvents) {
-
-                if (!biomeTagEventMap.containsKey(biomeTagEvent))
-                    continue;
-
-                if (!biomeTagEventMap.get(biomeTagEvent)) {
-                    eventsMet = false;
-                    break;
-                }
-            }
-
-            if (eventsMet) {
-                reusableValidEntries.add(entry);
-            }
-        }
-
-        return reusableValidEntries;
-    }*/
-
-
-    static boolean hasSongNotPlayedRecently(List<String> songs) {
+    static boolean hasSongNotPlayedRecently(List<String> songs)
+    {
         for (String song : songs) {
             if (!recentlyPickedSongs.contains(song)) {
                 return true;
@@ -472,24 +364,23 @@ public final class SongPicker {
         return false;
     }
 
-
-    static List<String> getNotRecentlyPlayedSongs(String[] songs) {
+    static List<String> getNotRecentlyPlayedSongs(String[] songs)
+    {
         List<String> notRecentlyPlayed = new ArrayList<>(Arrays.asList(songs));
         notRecentlyPlayed.removeAll(recentlyPickedSongs);
         return notRecentlyPlayed;
     }
 
-
-    static String pickRandomSong(List<String> songs) {
-
-        if (songs.isEmpty()) {
+    static String pickRandomSong(List<String> songs)
+    {
+        if (songs.isEmpty()) 
+        {
             return null;
         }
 
         List<String> cleanedSongs = new ArrayList<>(songs);
 
         cleanedSongs.removeAll(recentlyPickedSongs);
-
 
         String picked;
 
@@ -512,23 +403,19 @@ public final class SongPicker {
         }
 
         recentlyPickedSongs.add(picked);
-
-
         return picked;
     }
 
-
-    public static String getSongName(String song) {
+    public static String getSongName(String song)
+    {
         return song == null ? "" : song.replaceAll("([^A-Z])([A-Z])", "$1 $2");
     }
 
-    
-    public static boolean isEntryValid(RMRuntimeEntry entry) {
-
-        for (var condition : entry.conditions) {
-
+    public static boolean isEntryValid(RMRuntimeEntry entry)
+    {
+        for (var condition : entry.conditions)
+        {
             // each condition functions as an OR, if at least one of them is true then the condition is true
-
 
             boolean songpackEventsValid = false;
 
@@ -573,25 +460,22 @@ public final class SongPicker {
                 }
             }
 
+            /// REACTIVE MUSIC: EXTRAS EVENTS
+            /// Handling conditions for extras
+            boolean extrasValid = false;
+            for (RMExtrasCondition extra : condition.extras)
+            {
+                extrasValid = true; // Just set everything to true for now
+            }
 
-            if (!songpackEventsValid && !biomeTypesValid && !biomeTagsValid && !dimsValid && !blocksValid) {
+            if (!songpackEventsValid && !biomeTypesValid && !biomeTagsValid && !dimsValid && !blocksValid && !extrasValid)
+            {
                 // none of the OR conditions were valid on this condition, return false
                 return false;
             }
-
         }
 
         // we passed without failing so it must be true
         return true;
-        
     }
-
-
-
-
-
-
-
-
-
 }

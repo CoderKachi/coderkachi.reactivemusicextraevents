@@ -7,9 +7,7 @@ public enum SongpackEventType {
     MAIN_MENU,
     CREDITS,
 
-
     HOME,
-
 
     // --- TIME ---
     DAY,
@@ -21,7 +19,6 @@ public enum SongpackEventType {
     RAIN,
     SNOW,
     STORM,
-
 
     // --- world height ---
     UNDERWATER,
@@ -39,23 +36,17 @@ public enum SongpackEventType {
     FISHING,
     DYING,
 
-
     // TODO: remove
     OVERWORLD,
     NETHER,
     END,
 
     // MOBS
-
     BOSS,
     VILLAGE,
 
     NEARBY_MOBS,
 
-
-
-
     GENERIC
-
 }
 
