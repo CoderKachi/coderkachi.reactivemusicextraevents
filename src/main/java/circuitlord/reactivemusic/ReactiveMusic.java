@@ -4,7 +4,10 @@ import circuitlord.reactivemusic.config.ModConfig;
 import circuitlord.reactivemusic.config.MusicDelayLength;
 import circuitlord.reactivemusic.config.MusicSwitchSpeed;
 import circuitlord.reactivemusic.entries.RMRuntimeEntry;
+
 import coderkachi.reactivemusicextraevents.RMExtrasEntryPoint;
+import coderkachi.reactivemusicextraevents.RMExtrasRegistry;
+
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
 
@@ -252,8 +255,8 @@ public class ReactiveMusic implements ModInitializer
 		);
 	}
 
-	public static void newTick() {
-
+	public static void newTick()
+	{
 		if (thread == null) return;
 		if (currentSongpack == null) return;
 		if (loadedEntries.isEmpty()) return;
@@ -261,9 +264,9 @@ public class ReactiveMusic implements ModInitializer
 		MinecraftClient mc = MinecraftClient.getInstance();
 		if (mc == null) return;
 
-
 		// force a reasonable volume once on mod install, if you have full 100% everything it's way too loud
-		if (!config.hasForcedInitialVolume) {
+		if (!config.hasForcedInitialVolume)
+		{
 			config.hasForcedInitialVolume = true;
 			ModConfig.saveConfig();
 
@@ -276,21 +279,23 @@ public class ReactiveMusic implements ModInitializer
 			}
 		}
 
-
 		// always tick this
 		SongPicker.tickBlockCounterMap();
 
 		slowTickUpdateCounter++;
-		if (slowTickUpdateCounter > 20) {
-
+		if (slowTickUpdateCounter > 20)
+		{
 			currentDimBlacklisted = false;
 
 			// see if the dimension we're in is blacklisted -- update at same time as event map to keep them in sync
-			if (mc != null && mc.world != null) {
+			if (mc != null && mc.world != null)
+			{
 				String curDim = mc.world.getRegistryKey().getValue().toString();
 
-				for (String dim : config.blacklistedDimensions) {
-					if (dim.equals(curDim)) {
+				for (String dim : config.blacklistedDimensions)
+				{
+					if (dim.equals(curDim))
+					{
 						currentDimBlacklisted = true;
 						break;
 					}
@@ -302,6 +307,7 @@ public class ReactiveMusic implements ModInitializer
 			slowTickUpdateCounter = 0;
 		}
 
+		RMExtrasRegistry.updateTickables();
 
 		// -------------------------
 
@@ -315,22 +321,20 @@ public class ReactiveMusic implements ModInitializer
 
 		processTrackedSoundsMuteMusic();
 
-
 		RMRuntimeEntry newEntry = null;
 
 		List<RMRuntimeEntry> validEntries = getValidEntries();
 
 		// Pick the highest priority one
-		if (!validEntries.isEmpty()) {
+		if (!validEntries.isEmpty())
+		{
 			newEntry = validEntries.get(0);
 		}
 
 		processValidEvents(validEntries, previousValidEntries);
 
-
 		if (currentDimBlacklisted)
 			newEntry = null;
-
 
 		if (newEntry != null) {
 

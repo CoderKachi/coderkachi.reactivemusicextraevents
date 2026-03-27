@@ -26,5 +26,16 @@ public class ReactiveMusicExtraEvents implements RMExtrasEntryPoint
 
         // Testing validator object from a dedicated class
         RMExtrasRegistry.register("testc", new VTest());
+
+        /// TO DO
+        /// Based on feedback/suggestions/issues collected from the original mod
+        /// 
+        /// This will be a raw condition that doesn't take into account if the player is underground or not
+        /// ABOVE=[HEIGHT]
+        /// BELOW=[HEIGHT]
+        /// 
+        /// This will take into account if the player is underground
+        /// UNDERGROUNDBELOW=[HEIGHT]
+        /// 
     }
 }
