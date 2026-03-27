@@ -216,7 +216,8 @@ Example:
 ```
   # Mute RM when near a beacon block
 	soundsMuteMusic: [
-		"block.beacon.ambient"
+		"block.beacon.ambient",
+		"other.modded.soundname"
 	],
 ```
 
