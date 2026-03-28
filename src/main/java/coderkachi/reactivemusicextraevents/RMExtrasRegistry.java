@@ -1,17 +1,14 @@
 package coderkachi.reactivemusicextraevents;
 
+import net.minecraft.client.MinecraftClient;
+
 import java.util.*;
 
 public class RMExtrasRegistry
 {
     private static final Map<String, RMExtrasValidator> registry = new HashMap<>();
     private static final List<RMExtrasTickable> tickables = new ArrayList<>();
-
-    /// TO DO
-    /// Add a context holder (RMExtrasContext) to cache expensive calculations on a tick basis, not a validator basis
-    /// It should also hold common lookups for things like MinecraftClient, ClientPlayerEntity and World
-    /// EXAMPLE
-    /// Storing the number of HostileMobs nearby.
+    private static final RMExtrasContext context = new RMExtrasContext();
 
     public static void register(String key, RMExtrasValidator validator)
     {
@@ -29,16 +26,18 @@ public class RMExtrasRegistry
         return registry.get(key.toLowerCase());
     }
 
-    /// TO DO
-    /// Look making RMExtrasTickable store an internal tickCount and tickRate value
-    /// then add incrementTickCounter(), when tickCount >= tickRate allow .tick() to be called
-    /// WHY
-    /// To allow tickables to fine control how often they tick for performance
-    public static void updateTickables()
+    public static void updateTickables(MinecraftClient client)
     {
+        context.update(client);
+
         for (RMExtrasTickable tickable : tickables)
         {
-            tickable.tick();
+            tickable.tick(context);
         }
+    }
+
+    public static RMExtrasContext getContext()
+    {
+        return RMExtrasRegistry.context;
     }
 }

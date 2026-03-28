@@ -303,11 +303,10 @@ public class ReactiveMusic implements ModInitializer
 			}
 
 			SongPicker.tickEventMap();
-
 			slowTickUpdateCounter = 0;
 		}
 
-		RMExtrasRegistry.updateTickables();
+		RMExtrasRegistry.updateTickables(mc);
 
 		// -------------------------
 
