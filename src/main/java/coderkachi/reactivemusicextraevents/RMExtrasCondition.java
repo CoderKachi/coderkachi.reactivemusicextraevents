@@ -3,13 +3,13 @@ package coderkachi.reactivemusicextraevents;
 public class RMExtrasCondition
 {
     public final String key;
-    public final String value;
+    public final RMExtrasValue value;
     public final RMExtrasValidator validator;
 
-    public RMExtrasCondition(String key, String value, RMExtrasValidator validator)
+    public RMExtrasCondition(String key, String rawValue, RMExtrasValidator validator)
     {
         this.key = key;
-        this.value = value;
+        this.value = new RMExtrasValue(rawValue);
         this.validator = validator;
     }
 

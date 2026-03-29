@@ -1,20 +1,14 @@
 package coderkachi.reactivemusicextraevents.validators;
 
 import coderkachi.reactivemusicextraevents.RMExtrasContext;
-import coderkachi.reactivemusicextraevents.RMExtrasTickable;
 import coderkachi.reactivemusicextraevents.RMExtrasValidator;
+import coderkachi.reactivemusicextraevents.RMExtrasValue;
 
-public class VOvergroundLevel implements RMExtrasValidator, RMExtrasTickable 
+public class VOvergroundLevel implements RMExtrasValidator 
 {
     @Override
-    public void tick(RMExtrasContext context)
+    public boolean validate(RMExtrasValue value, RMExtrasContext context)
     {
-        
-    }
-
-    @Override
-    public boolean validate(String value, RMExtrasContext context)
-    {
-        return true;
+        return context.playerPosition.getY() > (value.intValue != null ? value.intValue : 54) && !context.playerIsUnderground;
     }
 }

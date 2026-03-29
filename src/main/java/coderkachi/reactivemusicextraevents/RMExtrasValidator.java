@@ -2,5 +2,5 @@ package coderkachi.reactivemusicextraevents;
 
 public interface RMExtrasValidator
 {
-    boolean validate(String value, RMExtrasContext context);
+    boolean validate(RMExtrasValue value, RMExtrasContext context);
 }

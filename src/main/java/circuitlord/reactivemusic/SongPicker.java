@@ -5,8 +5,6 @@ import circuitlord.reactivemusic.entries.RMRuntimeEntry;
 import circuitlord.reactivemusic.mixin.BossBarHudAccessor;
 
 import coderkachi.reactivemusicextraevents.RMExtrasCondition;
-import coderkachi.reactivemusicextraevents.RMExtrasRegistry;
-import coderkachi.reactivemusicextraevents.RMExtrasContext;
 
 import net.fabricmc.fabric.api.tag.convention.v1.ConventionalBiomeTags;
 import net.minecraft.block.Block;
