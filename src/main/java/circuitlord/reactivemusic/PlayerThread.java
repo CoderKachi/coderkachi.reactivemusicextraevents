@@ -233,13 +233,21 @@ public class PlayerThread extends Thread
 		return player == null ? 0 : player.getFrames();
 	}*/
 	
-	public void forceKill() {
-		try {
+	/// STRETCH GOAL
+	/// Look into what this function does and where it is called.
+	/// Replace / Remove finalize() sinec function is marked for removal (deprecated)
+
+	public void forceKill()
+	{
+		try
+		{
 			resetPlayer();
 			interrupt();
 			finalize();
 			kill = true;
-		} catch(Throwable e) {
+		} 
+		catch(Throwable e)
+		{
 			e.printStackTrace();
 		}
 	}
